@@ -1,0 +1,36 @@
+FROM mysql:latest
+
+# Change ownership of the MySQL data directory
+RUN chown -R mysql:root /var/lib/mysql/
+
+# Define arguments and environment variables
+ARG MYSQL_DATABASE
+ARG MYSQL_USER
+ARG MYSQL_PASSWORD
+ARG MYSQL_ROOT_PASSWORD
+ARG MYSQL_HOST
+
+
+ENV MYSQL_HOST=$MYSQL_HOST \
+    MYSQL_DATABASE=$MYSQL_DATABASE \
+    MYSQL_USER=$MYSQL_USER \
+    MYSQL_PASSWORD=$MYSQL_PASSWORD \
+    MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+
+# Copy SSL certificates and MySQL configuration
+COPY ./certs /etc/mysql/pem
+COPY my.cnf /etc/mysql/my.cnf
+
+# Set permissions for SSL certificates and configuration
+RUN chmod 444 /etc/mysql/pem/ca.pem \
+    && chmod 444 /etc/mysql/pem/client-cert.pem \
+    && chmod 400 /etc/mysql/pem/client-key.pem \
+    && chmod 444 /etc/mysql/pem/server-cert.pem \
+    && chmod 400 /etc/mysql/pem/server-key.pem \
+    && chmod 444 /etc/mysql/my.cnf
+
+# Change ownership of the SSL certificates directory
+RUN chown -R mysql:root /etc/mysql/pem/
+
+# Expose port 3306
+EXPOSE 3306

@@ -1,0 +1,8 @@
+FROM openjdk:11
+ARG USER_ID
+WORKDIR /usr/local/bin
+RUN apt-get update && apt-get install -y ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
+COPY --chown=${USER_ID}:0 generatecerts.sh /usr/local/bin/generatecerts.sh
+RUN mkdir -p /usr/local/bin/pem
+RUN mkdir -p /usr/local/bin/jks
+RUN chmod +x /usr/local/bin/generatecerts.sh

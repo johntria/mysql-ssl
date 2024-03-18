@@ -1,0 +1,33 @@
+services:
+  mysql-db:
+    container_name: mysql-db
+    env_file:
+      - .env
+    build:
+      dockerfile: DockerFile.mysql
+      args:
+        MYSQL_ROOT_PASSWORD: ${MYSQLDB_ROOT_PASSWORD}
+        MYSQL_DATABASE: ${MYSQLDB_DATABASE}
+        MYSQL_USER: ${MYSQLDB_USER}
+        MYSQL_PASSWORD: ${MYSQLDB_PASSWORD}
+        MYSQL_HOST: "*"
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - wpnet
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
+
+  cert-gen:
+    build:
+      dockerfile: DockerFile.gencerts
+      args:
+        USER_ID: ${USER_ID}
+    volumes:
+      - ./certs/:/usr/local/bin/newcerts
+    entrypoint: /usr/local/bin/generatecerts.sh
+networks:
+  wpnet:
+    driver: bridge
