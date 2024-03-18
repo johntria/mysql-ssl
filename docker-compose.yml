@@ -1,8 +1,6 @@
 services:
   mysql-db:
     container_name: mysql-db
-    env_file:
-      - .env
     build:
       dockerfile: DockerFile.mysql
       args:
@@ -25,9 +23,16 @@ services:
       dockerfile: DockerFile.gencerts
       args:
         USER_ID: ${USER_ID}
+        COUNTRY: ${COUNTRY}
+        STATE: ${STATE}
+        LOCALITY: ${LOCALITY}
+        ORGANIZATION: ${ORGANIZATION}
+        ORGANIZATIONAL_UNIT: ${ORGANIZATIONAL_UNIT}
+        COMMON_NAME: ${COMMON_NAME}
+        EMAIL_ADDRESS: ${EMAIL_ADDRESS}
     volumes:
-      - ./certs/:/usr/local/bin/newcerts
-    entrypoint: /usr/local/bin/generatecerts.sh
+      - ./certs:/usr/local/bin/newcerts
+
 networks:
   wpnet:
     driver: bridge

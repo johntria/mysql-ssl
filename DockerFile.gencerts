@@ -1,8 +1,30 @@
 FROM openjdk:11
 ARG USER_ID
+ARG COUNTRY
+ARG STATE
+ARG LOCALITY
+ARG ORGANIZATION
+ARG ORGANIZATIONAL_UNIT
+ARG COMMON_NAME
+ARG EMAIL_ADDRESS
+
+
+# Pass variables to the script as environment variables
+ENV COUNTRY=$COUNTRY
+ENV USER_ID=$USER_ID
+ENV STATE=$STATE
+ENV LOCALITY=$LOCALITY
+ENV ORGANIZATION=$ORGANIZATION
+ENV ORGANIZATIONAL_UNIT=$ORGANIZATIONAL_UNIT
+ENV COMMON_NAME=$COMMON_NAME
+ENV EMAIL_ADDRESS=$EMAIL_ADDRESS
+
 WORKDIR /usr/local/bin
 RUN apt-get update && apt-get install -y ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
 COPY --chown=${USER_ID}:0 generatecerts.sh /usr/local/bin/generatecerts.sh
-RUN mkdir -p /usr/local/bin/pem
-RUN mkdir -p /usr/local/bin/jks
+RUN mkdir -p /usr/local/bin/newcerts
 RUN chmod +x /usr/local/bin/generatecerts.sh
+
+
+
+CMD ["./generatecerts.sh"]
