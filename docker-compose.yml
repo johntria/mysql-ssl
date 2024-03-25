@@ -4,35 +4,33 @@ services:
     build:
       dockerfile: DockerFile.mysql
       args:
-        MYSQL_ROOT_PASSWORD: ${MYSQLDB_ROOT_PASSWORD}
-        MYSQL_DATABASE: ${MYSQLDB_DATABASE}
-        MYSQL_USER: ${MYSQLDB_USER}
-        MYSQL_PASSWORD: ${MYSQLDB_PASSWORD}
-        MYSQL_HOST: "*"
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
-    restart: always
-    networks:
-      - wpnet
     depends_on:
       cert-gen:
         condition: service_completed_successfully
 
+
   cert-gen:
+    image: cert-gen
     build:
       dockerfile: DockerFile.gencerts
       args:
-        USER_ID: ${USER_ID}
+        COMMON_NAME_CA: ${COMMON_NAME_CA}
+        COMMON_NAME_SERVER: ${COMMON_NAME_SERVER}
+        COMMON_NAME_CLIENT: ${COMMON_NAME_CLIENT}
         COUNTRY: ${COUNTRY}
         STATE: ${STATE}
         LOCALITY: ${LOCALITY}
         ORGANIZATION: ${ORGANIZATION}
         ORGANIZATIONAL_UNIT: ${ORGANIZATIONAL_UNIT}
-        COMMON_NAME: ${COMMON_NAME}
         EMAIL_ADDRESS: ${EMAIL_ADDRESS}
+        KEYSTORE_PASSWORD: ${KEYSTORE_PASSWORD}
     volumes:
-      - ./certs:/usr/local/bin/newcerts
-
-networks:
-  wpnet:
-    driver: bridge
+      - type: bind
+        source: ./cert
+        target: /var/lib/cert/
+    entrypoint: /usr/local/bin/script.sh

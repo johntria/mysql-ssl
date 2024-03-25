@@ -1,30 +1,26 @@
-FROM openjdk:11
-ARG USER_ID
+FROM eclipse-temurin:latest
+
 ARG COUNTRY
 ARG STATE
 ARG LOCALITY
 ARG ORGANIZATION
 ARG ORGANIZATIONAL_UNIT
-ARG COMMON_NAME
 ARG EMAIL_ADDRESS
+ARG COMMON_NAME_CA
+ARG COMMON_NAME_SERVER
+ARG COMMON_NAME_CLIENT
+ARG KEYSTORE_PASSWORD
 
-
-# Pass variables to the script as environment variables
 ENV COUNTRY=$COUNTRY
-ENV USER_ID=$USER_ID
 ENV STATE=$STATE
 ENV LOCALITY=$LOCALITY
 ENV ORGANIZATION=$ORGANIZATION
 ENV ORGANIZATIONAL_UNIT=$ORGANIZATIONAL_UNIT
-ENV COMMON_NAME=$COMMON_NAME
 ENV EMAIL_ADDRESS=$EMAIL_ADDRESS
-
-WORKDIR /usr/local/bin
-RUN apt-get update && apt-get install -y ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
-COPY --chown=${USER_ID}:0 generatecerts.sh /usr/local/bin/generatecerts.sh
-RUN mkdir -p /usr/local/bin/newcerts
-RUN chmod +x /usr/local/bin/generatecerts.sh
+ENV COMMON_NAME_CA=$COMMON_NAME_CA
+ENV COMMON_NAME_SERVER=$COMMON_NAME_SERVER
+ENV COMMON_NAME_CLIENT=$COMMON_NAME_CLIENT
+ENV KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD
 
 
-
-CMD ["./generatecerts.sh"]
+COPY ./generatecerts.sh /usr/local/bin/script.sh
