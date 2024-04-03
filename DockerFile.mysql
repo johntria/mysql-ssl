@@ -1,26 +1,21 @@
-FROM mysql:latest
-
+FROM mysql:latest as mysql
+#ARG VARS
 ARG MYSQL_USER
 ARG MYSQL_PASSWORD
 ARG MYSQL_ROOT_PASSWORD
 
+#ENV VARS
 ENV MYSQL_USER=$MYSQL_USER
 ENV MYSQL_PASSWORD=$MYSQL_PASSWORD
 ENV MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
 
-
+#Create dir if not exist
 RUN mkdir -p /var/lib/cert
-
-COPY ./cert/ca.pem /var/lib/cert/ca.pem
-COPY ./cert/server-key.pem /var/lib/cert/server-key.pem
-COPY ./cert/server-cert.pem /var/lib/cert/server-cert.pem
 
 RUN chown -R mysql:root /var/lib/cert
 RUN chmod -R 700 /var/lib/cert
 
-
 #We have to name it like a,b,c... in order to keep the order
-COPY setupssl.sh /docker-entrypoint-initdb.d/b.sh
-
+COPY ./setupssl.sh /docker-entrypoint-initdb.d/a.sh
 
 RUN chmod +x /docker-entrypoint-initdb.d/*.sh

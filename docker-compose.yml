@@ -1,24 +1,17 @@
 services:
-  mysql-db:
-    container_name: mysql-db
+  samba:
+    container_name: samba
+    env_file:
+      - .env
     build:
-      dockerfile: DockerFile.mysql
+      dockerfile: DockerFile.samba
+      target: samba
       args:
-        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3306:3306"
-    depends_on:
-      cert-gen:
-        condition: service_completed_successfully
-
-
-  cert-gen:
-    image: cert-gen
-    build:
-      dockerfile: DockerFile.gencerts
-      args:
+        TOTAL_SAMBA_USERS: ${TOTAL_SAMBA_USERS}
+        SAMBA_USER_1: ${SAMBA_USER_1}
+        SAMBA_PASSWORD_1: ${SAMBA_PASSWORD_1}
+        SAMBA_USER_2: ${SAMBA_USER_2}
+        SAMBA_PASSWORD_2: ${SAMBA_PASSWORD_2}
         COMMON_NAME_CA: ${COMMON_NAME_CA}
         COMMON_NAME_SERVER: ${COMMON_NAME_SERVER}
         COMMON_NAME_CLIENT: ${COMMON_NAME_CLIENT}
@@ -29,8 +22,51 @@ services:
         ORGANIZATIONAL_UNIT: ${ORGANIZATIONAL_UNIT}
         EMAIL_ADDRESS: ${EMAIL_ADDRESS}
         KEYSTORE_PASSWORD: ${KEYSTORE_PASSWORD}
+    ports:
+      - 445:445
+      - 139:139
     volumes:
-      - type: bind
-        source: ./cert
-        target: /var/lib/cert/
-    entrypoint: /usr/local/bin/script.sh
+      - ./smb.conf:/etc/samba/smb.conf
+#    networks:
+#      custom_net:
+#        ipv4_address: 10.5.0.5
+    healthcheck:
+      test: ["CMD","/usr/local/bin/healtchecksamba.sh"]
+      interval: 2s
+      timeout: 10s
+
+
+  mysql-db:
+    container_name: mysql-db
+    env_file:
+      - .env
+    build:
+      dockerfile: DockerFile.mysql
+      target: mysql
+      args:
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - data:/var/lib/cert
+    depends_on:
+      samba:
+        condition: service_healthy
+
+
+volumes:
+  data:
+    driver: cifs
+    driver_opts:
+      type: cifs
+      o: username=admin,password=1234
+      device: //10.5.0.5/cert_share/
+
+#networks:
+#  custom_net:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 10.5.0.0/16

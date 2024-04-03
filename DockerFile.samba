@@ -1,0 +1,60 @@
+FROM eclipse-temurin:latest AS builder
+#ARG VARS
+ARG COUNTRY
+ARG STATE
+ARG LOCALITY
+ARG ORGANIZATION
+ARG ORGANIZATIONAL_UNIT
+ARG EMAIL_ADDRESS
+ARG COMMON_NAME_CA
+ARG COMMON_NAME_SERVER
+ARG COMMON_NAME_CLIENT
+ARG KEYSTORE_PASSWORD
+#ENV VARS
+ENV COUNTRY=$COUNTRY
+ENV STATE=$STATE
+ENV LOCALITY=$LOCALITY
+ENV ORGANIZATION=$ORGANIZATION
+ENV ORGANIZATIONAL_UNIT=$ORGANIZATIONAL_UNIT
+ENV EMAIL_ADDRESS=$EMAIL_ADDRESS
+ENV COMMON_NAME_CA=$COMMON_NAME_CA
+ENV COMMON_NAME_SERVER=$COMMON_NAME_SERVER
+ENV COMMON_NAME_CLIENT=$COMMON_NAME_CLIENT
+ENV KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD
+
+RUN mkdir -p /var/lib/cert/
+COPY ./generatecerts.sh /usr/local/bin/script.sh
+RUN chmod +x /usr/local/bin/script.sh
+RUN /usr/local/bin/script.sh
+
+
+FROM alpine:latest as samba
+
+#todo: SAMBA_USERS AND SAMBA_PASSWORD must be scripted in order to created automatically
+#Args
+ARG TOTAL_SAMBA_USERS
+ARG SAMBA_USER_1
+ARG SAMBA_PASSWORD_1
+ARG SAMBA_USER_2
+ARG SAMBA_PASSWORD_2
+#Env
+ENV TOTAL_SAMBA_USERS=${TOTAL_SAMBA_USERS}
+ENV SAMBA_USER_1=${SAMBA_USER_1}
+ENV SAMBA_PASSWORD_1=${SAMBA_PASSWORD_1}
+ENV SAMBA_USER_2=${SAMBA_USER_2}
+ENV SAMBA_PASSWORD_2=${SAMBA_PASSWORD_2}
+
+RUN apk update && apk add samba && apk add bash && apk add curl
+
+COPY ./create-users.sh /usr/local/bin/create-users.sh
+RUN chmod +X /usr/local/bin/create-users.sh
+
+RUN mkdir -p /mnt/cert_share
+COPY --from=builder /var/lib/cert/ /mnt/cert_share
+
+COPY ./healtchecksamba.sh /usr/local/bin/healtchecksamba.sh
+RUN chmod +x /usr/local/bin/healtchecksamba.sh
+
+RUN chmod -R 777 /usr/local/bin/*.sh
+RUN /usr/local/bin/create-users.sh
+CMD /usr/local/bin/create-users.sh &&  /usr/local/bin/healtchecksamba.sh && chmod -R 777 /mnt && sleep infinity
