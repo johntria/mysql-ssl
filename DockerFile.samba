@@ -57,4 +57,6 @@ RUN chmod +x /usr/local/bin/healtchecksamba.sh
 
 RUN chmod -R 777 /usr/local/bin/*.sh
 RUN /usr/local/bin/create-users.sh
-CMD /usr/local/bin/create-users.sh &&  /usr/local/bin/healtchecksamba.sh && chmod -R 777 /mnt && sleep infinity
+RUN chmod -R 777 /mnt
+HEALTHCHECK --interval=2s --retries=10 --start-period=10s --timeout=10s CMD smbclient -L "//localhost/cert_share/"  -U admin%1234
+CMD /usr/local/bin/create-users.sh && sleep infinity
