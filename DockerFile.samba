@@ -52,8 +52,6 @@ RUN chmod +X /usr/local/bin/create-users.sh
 RUN mkdir -p /mnt/cert_share
 COPY --from=builder /var/lib/cert/ /mnt/cert_share
 
-COPY ./healtchecksamba.sh /usr/local/bin/healtchecksamba.sh
-RUN chmod +x /usr/local/bin/healtchecksamba.sh
 
 RUN chmod -R 777 /usr/local/bin/*.sh
 RUN /usr/local/bin/create-users.sh
