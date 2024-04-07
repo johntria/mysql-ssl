@@ -1,5 +1,5 @@
 
-# Dockerized MySql with TLS setup & Samba share for certification
+# Dockerized MySql with TLS setup & Samba share for certifications
 
 Hey folks !
 
