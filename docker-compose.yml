@@ -8,10 +8,8 @@ services:
       target: samba
       args:
         TOTAL_SAMBA_USERS: ${TOTAL_SAMBA_USERS}
-        SAMBA_USER_1: ${SAMBA_USER_1}
-        SAMBA_PASSWORD_1: ${SAMBA_PASSWORD_1}
-        SAMBA_USER_2: ${SAMBA_USER_2}
-        SAMBA_PASSWORD_2: ${SAMBA_PASSWORD_2}
+        SAMBA_USER: ${SAMBA_USER}
+        SAMBA_PASSWORD: ${SAMBA_PASSWORD}
         COMMON_NAME_CA: ${COMMON_NAME_CA}
         COMMON_NAME_SERVER: ${COMMON_NAME_SERVER}
         COMMON_NAME_CLIENT: ${COMMON_NAME_CLIENT}
@@ -29,7 +27,7 @@ services:
       - ./smb.conf:/etc/samba/smb.conf
       - data:/mnt/cert_share
     healthcheck:
-      test: ["CMD", "smbclient", "//localhost/cert_share", "-U", "${SAMBA_USER_1}%${SAMBA_PASSWORD_1}", "-c", "ls"]
+      test: ["CMD", "smbclient", "//localhost/cert_share", "-U", "${SAMBA_USER}%${SAMBA_PASSWORD}", "-c", "ls"]
       interval: 2s
       timeout: 10s
       retries: 3
