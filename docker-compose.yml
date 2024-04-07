@@ -27,13 +27,12 @@ services:
       - 139:139
     volumes:
       - ./smb.conf:/etc/samba/smb.conf
-  #    networks:
-  #      custom_net:
-  #        ipv4_address: 10.5.0.5
-  #    healthcheck:
-  #      test: ["CMD","/usr/local/bin/healtchecksamba.sh"]
-  #      interval: 2s
-  #      timeout: 10s
+      - data:/mnt/cert_share
+    healthcheck:
+      test: ["CMD", "smbclient", "//localhost/cert_share", "-U", "admin%1234", "-c", "ls"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
 
 
   mysql-db:
@@ -55,17 +54,10 @@ services:
       samba:
         condition: service_healthy
 
-
 volumes:
   data:
+    driver: local
     driver_opts:
-      type: cifs
-      o: username=admin,password=1234
-      device: //localhost/cert_share/
-
-#networks:
-#  custom_net:
-#    driver: bridge
-#    ipam:
-#      config:
-#        - subnet: 10.5.0.0/16
+      type: none
+      device: ./custom-volume
+      o: bind
