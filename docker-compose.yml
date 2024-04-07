@@ -29,7 +29,7 @@ services:
       - ./smb.conf:/etc/samba/smb.conf
       - data:/mnt/cert_share
     healthcheck:
-      test: ["CMD", "smbclient", "//localhost/cert_share", "-U", "admin%1234", "-c", "ls"]
+      test: ["CMD", "smbclient", "//localhost/cert_share", "-U", "${SAMBA_USER_1}%${SAMBA_PASSWORD_1}", "-c", "ls"]
       interval: 2s
       timeout: 10s
       retries: 3
